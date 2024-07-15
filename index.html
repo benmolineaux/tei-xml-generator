@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TEI XML Generator with POS</title>
+    <title>TEI XML Generator with POS and Morphemes</title>
     <style>
         body {
             display: flex;
@@ -11,7 +11,7 @@
         }
         textarea, pre {
             width: 50%;
-            height: 100vh;
+            height: calc(100vh / 3);
             padding: 20px;
             box-sizing: border-box;
             border: none;
@@ -30,8 +30,8 @@
             border-right: 1px solid #ccc;
         }
         .input-section textarea {
-            height: 50%;
-            margin-bottom: 20px;
+            height: calc(100vh / 3 - 40px);
+            margin-bottom: 10px;
         }
     </style>
 </head>
@@ -39,6 +39,7 @@
     <div class="input-section">
         <textarea id="textInput" placeholder="Type your text here..."></textarea>
         <textarea id="posInput" placeholder="Type the POS tags here..."></textarea>
+        <textarea id="correspInput" placeholder="Type the morpheme attributes here..."></textarea>
     </div>
     <pre id="xmlOutput"></pre>
 
@@ -46,12 +47,14 @@
         function updateXmlOutput() {
             const inputText = document.getElementById('textInput').value;
             const posText = document.getElementById('posInput').value;
+            const correspText = document.getElementById('correspInput').value;
 
             const words = inputText.split(' ');
             const posTags = posText.split(' ');
+            const correspTags = correspText.split(' ');
 
-            if (words.length !== posTags.length) {
-                document.getElementById('xmlOutput').textContent = 'Error: The number of words and POS tags do not match.';
+            if (words.length !== posTags.length || words.length !== correspTags.length) {
+                document.getElementById('xmlOutput').textContent = 'Error: The number of words, POS tags, and morpheme attributes do not match.';
                 return;
             }
 
@@ -60,14 +63,21 @@
             words.forEach((word, index) => {
                 let morphemes = word.split('-');
                 let pos = posTags[index];
+                let corresp = correspTags[index].split('-');
+
+                if (morphemes.length !== corresp.length) {
+                    document.getElementById('xmlOutput').textContent = 'Error: The number of morphemes and corresp attributes do not match for the word "' + word + '".';
+                    return;
+                }
+
                 if (morphemes.length > 1) {
                     xmlOutput += `<w pos="${pos}">`;
-                    morphemes.forEach(morpheme => {
-                        xmlOutput += `<m>${morpheme}</m>`;
+                    morphemes.forEach((morpheme, mIndex) => {
+                        xmlOutput += `<m corresp="${corresp[mIndex]}">${morpheme}</m>`;
                     });
                     xmlOutput += '</w> ';
                 } else {
-                    xmlOutput += `<w pos="${pos}">${word}</w> `;
+                    xmlOutput += `<w pos="${pos}"><m corresp="${corresp[0]}">${word}</m></w> `;
                 }
             });
 
@@ -77,6 +87,7 @@
 
         document.getElementById('textInput').addEventListener('input', updateXmlOutput);
         document.getElementById('posInput').addEventListener('input', updateXmlOutput);
+        document.getElementById('correspInput').addEventListener('input', updateXmlOutput);
     </script>
 </body>
 </html>
