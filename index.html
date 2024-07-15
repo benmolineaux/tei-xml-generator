@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TEI XML Generator</title>
+    <title>TEI XML Generator with POS</title>
     <style>
         body {
             display: flex;
@@ -20,34 +20,63 @@
         textarea {
             border-right: 1px solid #ccc;
         }
+        .input-section {
+            display: flex;
+            flex-direction: column;
+            width: 50%;
+            height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+            border-right: 1px solid #ccc;
+        }
+        .input-section textarea {
+            height: 50%;
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
-    <textarea id="textInput" placeholder="Type your text here..."></textarea>
+    <div class="input-section">
+        <textarea id="textInput" placeholder="Type your text here..."></textarea>
+        <textarea id="posInput" placeholder="Type the POS tags here..."></textarea>
+    </div>
     <pre id="xmlOutput"></pre>
 
     <script>
-        document.getElementById('textInput').addEventListener('input', function () {
-            const inputText = this.value;
+        function updateXmlOutput() {
+            const inputText = document.getElementById('textInput').value;
+            const posText = document.getElementById('posInput').value;
+
             const words = inputText.split(' ');
+            const posTags = posText.split(' ');
+
+            if (words.length !== posTags.length) {
+                document.getElementById('xmlOutput').textContent = 'Error: The number of words and POS tags do not match.';
+                return;
+            }
+
             let xmlOutput = '<p>';
 
-            words.forEach(word => {
+            words.forEach((word, index) => {
                 let morphemes = word.split('-');
+                let pos = posTags[index];
                 if (morphemes.length > 1) {
-                    xmlOutput += '<w>';
+                    xmlOutput += `<w pos="${pos}">`;
                     morphemes.forEach(morpheme => {
                         xmlOutput += `<m>${morpheme}</m>`;
                     });
                     xmlOutput += '</w> ';
                 } else {
-                    xmlOutput += `<w>${word}</w> `;
+                    xmlOutput += `<w pos="${pos}">${word}</w> `;
                 }
             });
 
             xmlOutput = xmlOutput.trim() + '</p>';
             document.getElementById('xmlOutput').textContent = xmlOutput;
-        });
+        }
+
+        document.getElementById('textInput').addEventListener('input', updateXmlOutput);
+        document.getElementById('posInput').addEventListener('input', updateXmlOutput);
     </script>
 </body>
 </html>
