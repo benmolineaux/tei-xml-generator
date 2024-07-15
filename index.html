@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TEI XML Generator</title>
+    <style>
+        body {
+            display: flex;
+            font-family: Arial, sans-serif;
+        }
+        textarea, pre {
+            width: 50%;
+            height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+            border: none;
+            resize: none;
+        }
+        textarea {
+            border-right: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+    <textarea id="textInput" placeholder="Type your text here..."></textarea>
+    <pre id="xmlOutput"></pre>
+
+    <script>
+        document.getElementById('textInput').addEventListener('input', function () {
+            const inputText = this.value;
+            const words = inputText.split(' ');
+            let xmlOutput = '<p>';
+
+            words.forEach(word => {
+                let morphemes = word.split('-');
+                if (morphemes.length > 1) {
+                    xmlOutput += '<w>';
+                    morphemes.forEach(morpheme => {
+                        xmlOutput += `<m>${morpheme}</m>`;
+                    });
+                    xmlOutput += '</w> ';
+                } else {
+                    xmlOutput += `<w>${word}</w> `;
+                }
+            });
+
+            xmlOutput = xmlOutput.trim() + '</p>';
+            document.getElementById('xmlOutput').textContent = xmlOutput;
+        });
+    </script>
+</body>
+</html>
